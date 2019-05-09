@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>hello</title>
+
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/reveal.css" />
+    <link rel="stylesheet" href="css/theme/league.css" />
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/monokai.css" />
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.type = "text/css";
+      link.href = window.location.search.match(/print-pdf/gi)
+        ? "css/print/pdf.css"
+        : "css/print/paper.css";
+      document.getElementsByTagName("head")[0].appendChild(link);
+    </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h1>Innovation Friday</h1>
+          <h3>another weird subject?</h3>
+          <p>
+            <small
+              >Last time I talked about GIS (geographical information
+              system)</small
+            >
+          </p>
+          <p><small>Today I will talk about a tiny part of GIS</small></p>
+        </section>
+        <section>
+          <h1>Geocoding</h1>
+          <h3>kezako?</h3>
+          <p>
+            <small
+              >Geocoding is the process of transforming an address to a location
+              on the Earth's surface. <br />
+              Reverse geocoding, on the other hand, converts geographic
+              coordinates to a description of a location, usually the name of a
+              place or an addressable location.
+              <a href="https://en.wikipedia.org/wiki/Geocoding"
+                >wikipedia</a
+              ></small
+            >
+          </p>
+        </section>
+        <section><h1>Boring !</h1></section>
+        <section><h1>I agree</h1></section>
+        <section><h1>Then why not creating an API ?</h1></section>
+        <section><h1>Let's do it</h1></section>
+        <section><h1>We only have ten minutes</h1></section>
+        <section>
+          <h3>Let's crack on</h3>
+          <p class="fragment">we need a plan</p>
+          <p class="fragment">not a map, a plan</p>
+          <p class="fragment">an architecture diagram</p>
+        </section>
+        <section><h1>Simple</h1>
+          <img width="671" height="364" data-src="./images/lambda_as_proxy.png" alt="architecture" border="0">
+        </section>
+        <section>
+          <h3>Todo</h3>
+          <p class="fragment">get a Google API key (done)</p>
+          <p class="fragment">get an AWS account (done)</p>
+          <p class="fragment">create a project</p>
+          <p class="fragment">Hurry up!</p>
+        </section>
+        <section>
+          <h3>Create a project</h3>
+          <pre><code class="hljs">
+$ npx serverless create --template aws-nodejs --path whereis
+$ cd whereis
+$ npm init -y
+$ npm i -S axios dotenv
+# $ npm i -D serverless serverless-offline
+				</code></pre>
+        </section>
+        <section>
+          <h3>Hack the serverless file</h3>
+          <pre><code class="hljs">
+service: whereis # NOTE: update this with your service name
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  region: eu-west-2
+
+plugins:
+  - serverless-offline # serverless-offline needs to be last in the list
+
+functions:
+  whereIs:
+    handler: handler.whereIs
+    events:
+      - http:
+          path: whereis
+          method: get
+          cors: true
+				</code></pre>
+        </section>
+
+
+        <section>
+          <h3>We always need an env file</h3>
+          <pre><code class="hljs">
+$ echo "GOOGLE_API_KEY=$YOUR-GOOGLE-API-KEY" > .env
+        </code></pre>
+        </section>
+
+        <section>
+          <h3>send an error</h3>
+          <pre><code class="hljs">
+const badRequest = data => {
+  console.warn('bad request:', data);
+  return {
+    statusCode: 400,
+    headers: {
+      'Access-Control-Allow-Origin': '*', // Required for CORS support to work
+      'Access-Control-Allow-Credentials': true // Required for cookies, authorization headers with HTTPS
+    },
+    body: JSON.stringify({
+      error: 400,
+      message: data,
+    })
+  };
+};
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>send a success</h3>
+          <pre><code class="hljs">
+const success = data => {
+  return {
+    statusCode: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*', // Required for CORS support to work
+      'Access-Control-Allow-Credentials': true // Required for cookies, authorization headers with HTTPS
+    },
+    body: JSON.stringify(data)
+  };
+};
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>Google API</h3>
+          <pre><code class="hljs">
+const GOOGLE_GEOCODE_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
+
+const geocodeGoogle = params => axios.get(GOOGLE_GEOCODE_URL, {
+  params
+});
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>handler</h3>
+          <pre><code class="hljs">
+module.exports.whereIs = async (event) => {
+  // read queryStringParameter
+
+  // if latlng : reverseGeocode
+
+  // if address : geocode
+
+};
+
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>queryStringParameter</h3>
+          <pre><code class="hljs">
+// read queryStringParameter
+const query = event.queryStringParameters;
+if (!query) {
+  return badRequest('Missing input parameters');
+}
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>reverse Geocode</h3>
+          <pre><code class="hljs">
+const params = {};
+if (query.lat || query.lng) {
+  // if latlng : reverseGeocode
+  console.log('reverse geocode with coordinates', query.lat, query.lng);
+  params.latlng = `${query.lat},${query.lng}`;
+}
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>Geocode</h3>
+          <pre><code class="hljs">
+if (query.address) {
+  // if address : geocode
+  console.log("geocode with address", query.address);
+  params.address = query.address;
+}
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>Call Google Maps</h3>
+          <pre><code class="hljs">
+params.key = process.env.GOOGLE_API_KEY;
+try {
+  const result = await geocodeGoogle(params);
+  return success(result.data);
+} catch (err) {
+  return badRequest(err);
+}
+          </code></pre>
+        </section>
+
+        <section>
+          <h1>Done !</h1>
+          <h3>deploy it</h3>
+          <pre><code class="hljs">
+$ npx serverless deploy
+          </code></pre>
+        </section>
+
+        <section>
+          <h1>Try it</h1>
+          <p>
+						- <a href="https://etqslu4x99.execute-api.eu-west-2.amazonaws.com/dev/whereis?lat=51.518991&lng=-0.2100558">where is 51.518991,-0.2100558</a> <br>
+						- <a href="https://etqslu4x99.execute-api.eu-west-2.amazonaws.com/dev/whereis?address=lyon">where is lyon</a> <br>
+						- <a href="https://etqslu4x99.execute-api.eu-west-2.amazonaws.com/dev/whereis?address=W10+5XL">where is W10 5XL</a>
+					</p>
+        </section>
+
+        <section>
+          <h1>C'est fini</h1>
+          <h3>Merci</h3>
+          <h6><small>resources</small></h6>
+          <p>
+						- <a href="https://github.com/tsamaya/innovation-friday-geocoding">Github</a> <br>
+					</p>
+        </section>
+
+      </div>
+    </div>
+
+    <script src="js/reveal.js"></script>
+
+    <script>
+      // More info about config & dependencies:
+      // - https://github.com/hakimel/reveal.js#configuration
+      // - https://github.com/hakimel/reveal.js#dependencies
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        center: true,
+        hash: true,
+
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+        // More info https://github.com/hakimel/reveal.js#dependencies
+        dependencies: [
+          { src: "plugin/markdown/marked.js" },
+          { src: "plugin/markdown/markdown.js" },
+          { src: "plugin/notes/notes.js", async: true },
+          { src: "plugin/highlight/highlight.js", async: true }
+        ]
+      });
+    </script>
+  </body>
+</html>
