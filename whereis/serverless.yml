@@ -1,0 +1,25 @@
+service: whereis # NOTE: update this with your service name
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  region: eu-west-2
+
+plugins:
+  - serverless-offline # serverless-offline needs to be last in the list
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - http:
+          path: hello
+          method: get
+  whereIs:
+    handler: handler.whereIs
+    events:
+      - http:
+          path: whereis
+          method: get
+          cors: true
