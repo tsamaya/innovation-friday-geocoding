@@ -15,7 +15,7 @@
     "serverless-offline": "^4.10.0"
   },
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.21.2",
     "dotenv": "^8.0.0"
   }
 }
